@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from asyncio import futures
 from decimal import Decimal
 import urllib.request
 from datetime import datetime
 
 from django.http import HttpResponse
 from django.contrib.auth.models import User
+from concurrent.futures import ThreadPoolExecutor,as_completed
 
 # Create your views here.
 from rest_framework.permissions import AllowAny
@@ -16,13 +18,22 @@ from rest_framework import status
 
 from restapi.models import Expenses,Groups,Category
 from restapi.serializers import UserSerializer,GroupSerializer,CategorySerializer,ExpensesSerializer,UserExpense
-from restapi.custom_exception import UnauthorizedUserException
+from restapi.custom_exception import UnauthorizedUserException,BadRequestException
 
 
 
 
 def index(_request):
     return HttpResponse("Hello, world. You're at Rest.")
+
+def get_user_ids(body,type):
+    user_ids = []
+    if body.get(type, None) is not None and body[type].get('user_ids', None) is not None:
+            user_ids = body[type]['user_ids']
+            for user_id in user_ids:
+                if not User.objects.filter(id=user_id).exists():
+                    raise BadRequestException()
+    return user_ids
 
 
 @api_view(['POST'])
@@ -108,35 +119,31 @@ class group_view_set(ModelViewSet):
 
     @action(methods=['put'], detail=True)
     def members(self, request, pk=None):
-        group = Groups.objects.get(id=pk)
-        if group not in self.get_queryset():
+        if not  Groups.objects.filter(id=pk).exists():
             raise UnauthorizedUserException()
+        group = Groups.objects.get(id=pk)
         body = request.data
-        if body.get('add', None) is not None and body['add'].get('user_ids', None) is not None:
-            added_ids = body['add']['user_ids']
-            for user_id in added_ids:
-                group.members.add(user_id)
-        if body.get('remove', None) is not None and body['remove'].get('user_ids', None) is not None:
-            removed_ids = body['remove']['user_ids']
-            for user_id in removed_ids:
-                group.members.remove(user_id)
+        added_ids = get_user_ids(body,'add')
+        removed_ids = get_user_ids(body,'remove')
+        group.members.add(*added_ids)
+        group.members.remove(*removed_ids)
         group.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=True)
     def expenses(self, _request, pk=None):
-        group = Groups.objects.get(id=pk)
-        if group not in self.get_queryset():
+        if not  Groups.objects.filter(id=pk).exists():
             raise UnauthorizedUserException()
+        group = Groups.objects.get(id=pk)
         expenses = group.expenses_set
         serializer = ExpensesSerializer(expenses, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=True)
     def balances(self, _request, pk=None):
-        group = Groups.objects.get(id=pk)
-        if group not in self.get_queryset():
+        if not  Groups.objects.filter(id=pk).exists():
             raise UnauthorizedUserException()
+        group = Groups.objects.get(id=pk)
         expenses = Expenses.objects.filter(group=group)
         dues = {}
         for expense in expenses:
@@ -263,9 +270,11 @@ def multiThreadedReader(urls, num_threads):
         Read multiple files through HTTP
     """
     result = []
-    for url in urls:
-        data = reader(url, 60)
-        data = data.decode('utf-8')
-        result.extend(data.split("\n"))
-    result = sorted(result, key=lambda elem:elem[1])
+    with ThreadPoolExecutor(max_workers=urls) as executor:
+        futures = [executor.submit(reader(url)) for url in urls]
+        for future in as_completed(futures):
+            data = future.result()
+            data = data.decode('utf-8')
+            result.extend(data.split("\n"))
+        result = sorted(result, key=lambda elem:elem[1])
     return result
