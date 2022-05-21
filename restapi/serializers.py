@@ -16,6 +16,7 @@ class UserSerializer(ModelSerializer):
             Create user object
         """
         user = User.objects.create_user(**validated_data)
+        logging.info("User created")
         return user
 
     class Meta(object):
@@ -55,8 +56,10 @@ class ExpensesSerializer(ModelSerializer):
         """
         expense_users = validated_data.pop('users')
         expense = Expenses.objects.create(**validated_data)
+        logging.info(f"Expense created")
         for eu in expense_users:
             UserExpense.objects.create(expense=expense, **eu)
+            logging.info(f"User expense created for user id {eu.id}")
         return expense
 
     def update(self, instance, validated_data):
@@ -78,6 +81,7 @@ class ExpensesSerializer(ModelSerializer):
                 ],
             )
         instance.save()
+        logging.info(f"Expense object with id {self.id} updated")
         return instance
 
     def validate(self, attrs):
@@ -98,12 +102,15 @@ class ExpensesSerializer(ModelSerializer):
             group = Groups.objects.get(pk=attrs['group'].id)
             group_users = group.members.all()
             if user not in group_users:
+                logging.info("Error: User not present in group")
                 raise UnauthorizedUserException()
             for user in attrs['users']:
                 if user['user'] not in group_users:
+                    logging.info("Validation Error: User not in group")
                     raise ValidationError('Only group members should be listed in a group transaction')
         else:
             if user.id not in user_ids:
+                logging.info("Validation Error: User not part of expense")
                 raise ValidationError('For non-group expenses, user should be part of expense')
 
         total_amount:float = attrs['total_amount']
@@ -115,6 +122,7 @@ class ExpensesSerializer(ModelSerializer):
             amount_owed += user['amount_owed']
             amount_lent += user['amount_lent']
         if amount_lent != amount_owed or amount_lent != total_amount:
+            logging.info("Validation Error: Inconsistent amounts")
             raise ValidationError('Given amounts are inconsistent')
 
         return attrs
