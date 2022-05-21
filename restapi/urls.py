@@ -10,7 +10,7 @@ from restapi.views import (
     index,
     logout,
     balance,
-    logProcessor,
+    log_processor,
 )
 
 
@@ -25,7 +25,7 @@ urlpatterns = [
     path("auth/logout/", logout),
     path("auth/login/", views.obtain_auth_token),
     path("balances/", balance),
-    path("process-logs/", logProcessor),
+    path("process-logs/", log_processor),
 ]
 
 urlpatterns += router.urls

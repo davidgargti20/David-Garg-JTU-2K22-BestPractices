@@ -30,7 +30,7 @@ from restapi.custom_exception import UnauthorizedUserException, BadRequestExcept
 from restapi.utils import (
     aggregate,
     sort_by_time_stamp,
-    multiThreadedReader,
+    multi_threaded_reader,
     transform,
     response_format,
 )
@@ -324,7 +324,7 @@ def log_processor(request):
             {"status": "failure", "reason": "No log files provided in request"},
             status=status.HTTP_400_BAD_REQUEST,
         )
-    logs = multiThreadedReader(
+    logs = multi_threaded_reader(
         urls=data["logFiles"], num_threads=data["parallelFileProcessingCount"]
     )
     sorted_logs = sort_by_time_stamp(logs)
