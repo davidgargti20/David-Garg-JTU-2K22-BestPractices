@@ -20,34 +20,34 @@ class UserTestCase(TestCase):
 
 
 class CategoryTestCase(TestCase):
-    def create_user(self, name):
+    def create_category(self, name):
         return Category.objects.create(name=name)
 
-    def test_user_creation(self):
-        w = self.create_user(name="testcategory")
+    def test_category_creation(self):
+        w = self.create_category(name="testcategory")
         self.assertTrue(isinstance(w, Category))
         self.assertEqual(w.name, "testcategory")
 
 
 class GroupTestCase(TestCase):
-    def create_user(self, name):
+    def create_group(self, name):
         return Groups.objects.create(name=name)
 
-    def test_user_creation(self):
-        w = self.create_user(name="testgroup")
+    def test_group_creation(self):
+        w = self.create_group(name="testgroup")
         self.assertTrue(isinstance(w, Groups))
         self.assertEqual(w.name, "testgroup")
 
 
 class ExpensesTestCase(TestCase):
-    def create_user(self, description, total_amount):
+    def create_expenses(self, description, total_amount):
         category, _ = Category.objects.get_or_create(name="testcategory")
         return Expenses.objects.create(
             description=description, total_amount=total_amount, category=category
         )
 
-    def test_user_creation(self):
-        w = self.create_user(description="description", total_amount=100)
+    def test_expenses_creation(self):
+        w = self.create_expenses(description="description", total_amount=100)
         self.assertTrue(isinstance(w, Expenses))
         self.assertEqual(w.description, "description")
         self.assertEqual(w.total_amount, 100)
