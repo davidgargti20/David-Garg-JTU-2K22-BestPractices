@@ -300,7 +300,7 @@ class expenses_view_set(ModelViewSet):
 @api_view(["post"])
 @authentication_classes([])
 @permission_classes([])
-def logProcessor(request):
+def log_processor(request):
     """
     Log processing Request
     Args:
