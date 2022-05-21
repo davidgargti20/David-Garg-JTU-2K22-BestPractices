@@ -5,6 +5,9 @@ from django.contrib.auth.models import User
 
 from restapi.models import Category, Groups, UserExpense, Expenses
 from restapi.custom_exception import UnauthorizedUserException
+import logging
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 class UserSerializer(ModelSerializer):
@@ -58,7 +61,7 @@ class ExpensesSerializer(ModelSerializer):
 
     def update(self, instance, validated_data):
         """
-            To Update Exepense object
+            To Update Expense object
         """
         user_expenses = validated_data.pop('users')
         instance.description = validated_data['description']

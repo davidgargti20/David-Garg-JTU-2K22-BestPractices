@@ -17,7 +17,9 @@ from restapi.models import Expenses,Groups,Category
 from restapi.serializers import UserSerializer,GroupSerializer,CategorySerializer,ExpensesSerializer,UserExpense
 from restapi.custom_exception import UnauthorizedUserException,BadRequestException
 from restapi.utils import aggregate,sort_by_time_stamp,multiThreadedReader,transform,response_format
-
+import logging
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 
@@ -48,6 +50,7 @@ def get_user_ids(body,type:str):
             user_ids = body[type]['user_ids']
             for user_id in user_ids:
                 if not User.objects.filter(id=user_id).exists():
+                    logging.info("Validation Error: Bad Request")
                     raise BadRequestException()
     return user_ids
 
@@ -62,6 +65,7 @@ def logout(request):
             Empty 204 Response
     """
     request.user.auth_token.delete()
+    logging.info(f"Logged out user {request.user.id}")
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -90,6 +94,7 @@ def balance(request):
     final_balance = {k: v for k, v in final_balance.items() if v != 0}
 
     response = [{"user": k, "amount": int(v)} for k, v in final_balance.items()]
+    logging.info(f"Returned Balances")
     return Response(response, status=status.HTTP_200_OK)
 
 
@@ -155,6 +160,9 @@ class group_view_set(ModelViewSet):
         groups = user.members.all()
         if self.request.query_params.get('q', None) is not None:
             groups = groups.filter(name__icontains=self.request.query_params.get('q', None))
+            logging.info(f"Returned users with name containing {self.request.query_params.get('q', None)}")
+        else:
+            logging.info(f"Returned all users")
         return groups
 
     def create(self, request, *args, **kwargs):
@@ -162,7 +170,9 @@ class group_view_set(ModelViewSet):
         data = self.request.data
         group = Groups(**data)
         group.save()
+        logging.info(f"Created group having id {group.id}")
         group.members.add(user)
+        logging.info("Added user {user.id} to group")
         serializer = self.get_serializer(group)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -174,9 +184,12 @@ class group_view_set(ModelViewSet):
         body = request.data
         added_ids:list[int] = get_user_ids(body,'add')
         removed_ids:list[int] = get_user_ids(body,'remove')
+        logging.info(f"Users to be added {added_ids}")
         group.members.add(*added_ids)
+        logging.info(f"Users to be removed {removed_ids}")
         group.members.remove(*removed_ids)
         group.save()
+        logging.info("Succefully Added and Removed users from group")
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=True)

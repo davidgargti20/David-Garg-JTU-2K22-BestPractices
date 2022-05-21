@@ -2,6 +2,9 @@ import urllib.request
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor,as_completed
 from restapi.constants import HTTP_READ_LIMIT
+import logging
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 def sort_by_time_stamp(logs):
@@ -17,6 +20,7 @@ def sort_by_time_stamp(logs):
         data.append(log.split(" "))
     # print(data)
     data = sorted(data, key=lambda elem: elem[1])
+    logging.info("Sorted Logs")
     return data
 
 def response_format(raw_data):
@@ -32,6 +36,7 @@ def response_format(raw_data):
             logs.append({'exception': exception, 'count': count})
         entry['logs'] = logs
         response.append(entry)
+    logging.info("Formatted logs")
     return response
 
 def aggregate(cleaned_logs):
@@ -48,12 +53,13 @@ def aggregate(cleaned_logs):
         value = data.get(key, {})
         value[text] = value.get(text, 0)+1
         data[key] = value
+    logging.info("Aggregated Logs")
     return data
 
 
 def transform(logs):
     """
-        Function to transform logs ac to time
+        Function to transform logs by time
         Args:
             logs: list of logs
         Return:
@@ -81,7 +87,7 @@ def transform(logs):
 
         result.append([key, text])
         print(key)
-
+    logging.info("Transformed logs")
     return result
 
 
@@ -110,4 +116,5 @@ def multiThreadedReader(urls, num_threads):
             data = data.decode('utf-8')
             result.extend(data.split("\n"))
         result = sorted(result, key=lambda elem:elem[1])
+    logging.info("Fetched logs")
     return result
