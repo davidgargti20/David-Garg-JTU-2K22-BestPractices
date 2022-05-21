@@ -9,6 +9,9 @@ from restapi.custom_exception import UnauthorizedUserException
 
 class UserSerializer(ModelSerializer):
     def create(self, validated_data):
+        """
+            Create user object
+        """
         user = User.objects.create_user(**validated_data)
         return user
 
@@ -44,6 +47,9 @@ class ExpensesSerializer(ModelSerializer):
     users = UserExpenseSerializer(many=True, required=True)
 
     def create(self, validated_data):
+        """
+            Create Expense objects
+        """
         expense_users = validated_data.pop('users')
         expense = Expenses.objects.create(**validated_data)
         for eu in expense_users:
@@ -51,6 +57,9 @@ class ExpensesSerializer(ModelSerializer):
         return expense
 
     def update(self, instance, validated_data):
+        """
+            To Update Exepense object
+        """
         user_expenses = validated_data.pop('users')
         instance.description = validated_data['description']
         instance.category = validated_data['category']
@@ -69,6 +78,14 @@ class ExpensesSerializer(ModelSerializer):
         return instance
 
     def validate(self, attrs):
+        """
+            Validate attributes
+            Args:
+                self: self object:
+                attrs: attributes dict
+            Return:
+                Attributes if validation is successful
+        """
         user = self.context['request'].user
         user_ids = [user['user'].id for user in attrs['users']]
         if len(set(user_ids)) != len(user_ids):

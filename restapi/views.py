@@ -23,9 +23,26 @@ from restapi.utils import aggregate,sort_by_time_stamp,multiThreadedReader,trans
 
 
 def index(_request):
+    """
+        Index Page Request
+
+        Args:
+            request: index request
+        Return:
+            Http Response
+    """
     return HttpResponse("Hello, world. You're at Rest.")
 
 def get_user_ids(body,type:str):
+    """
+        To return user id list from body
+
+        Args:
+            body: Request body dict
+            type: type of user id to be returned
+        Return:
+            List of user ids
+    """
     user_ids:list[int] = []
     if body.get(type, None) is not None and body[type].get('user_ids', None) is not None:
             user_ids = body[type]['user_ids']
@@ -36,12 +53,28 @@ def get_user_ids(body,type:str):
 
 @api_view(['POST'])
 def logout(request):
+    """
+        Logout Request
+
+        Args:
+            request: Logout request
+        Return:
+            Empty 204 Response
+    """
     request.user.auth_token.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['GET'])
 def balance(request):
+    """
+        Return user balances request
+
+        Args:
+            request: Balance request
+        Return:
+            JSON response with balances is successful
+    """
     user = request.user
     expenses = Expenses.objects.filter(users__in=user.expenses.all())
     final_balance = {}
@@ -61,6 +94,15 @@ def balance(request):
 
 
 def normalize(expense):
+    """
+        Function to return user balance
+
+        Args:
+            expense:Expense object
+        
+        Return:
+            List of balance object dict containing balance info
+    """
     user_balances = expense.users.all()
     dues:dict = {}
     for user_balance in user_balances:
@@ -84,18 +126,27 @@ def normalize(expense):
 
 
 class user_view_set(ModelViewSet):
+    """
+        Viewset for the users api
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (AllowAny,)
 
 
 class category_view_set(ModelViewSet):
+    """
+        Viewset for the categories api
+    """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     http_method_names = ['get', 'post']
 
 
 class group_view_set(ModelViewSet):
+    """
+        Viewset for the groups api
+    """
     queryset = Groups.objects.all()
     serializer_class = GroupSerializer
 
@@ -169,6 +220,9 @@ class group_view_set(ModelViewSet):
 
 
 class expenses_view_set(ModelViewSet):
+    """
+        Viewset for expenses api
+    """
     queryset = Expenses.objects.all()
     serializer_class = ExpensesSerializer
 
@@ -185,6 +239,13 @@ class expenses_view_set(ModelViewSet):
 @authentication_classes([])
 @permission_classes([])
 def logProcessor(request):
+    """
+        Log processing Request
+        Args:
+            request: request object
+        Return:
+            Response with processed data if successful
+    """
     data = request.data
     num_threads:int = data['parallelFileProcessingCount']
     log_files:list[str] = data['logFiles']

@@ -5,6 +5,13 @@ from restapi.constants import HTTP_READ_LIMIT
 
 
 def sort_by_time_stamp(logs):
+    """
+        Sort Logs by time
+        Args:
+            logs:list of logs
+        Return:
+            Sorted list of logs
+    """
     data:list = []
     for log in logs:
         data.append(log.split(" "))
@@ -13,6 +20,9 @@ def sort_by_time_stamp(logs):
     return data
 
 def response_format(raw_data):
+    """
+        Returns formatted log data
+    """
     response:list = []
     for timestamp, data in raw_data.items():
         entry:dict = {'timestamp': timestamp}
@@ -25,6 +35,13 @@ def response_format(raw_data):
     return response
 
 def aggregate(cleaned_logs):
+    """
+        Function to aggregrate logs
+        Args:
+            cleaned_logs:list of cleaned logs
+        Return:
+            Agrrreate Logs dict
+    """
     data = {}
     for log in cleaned_logs:
         [key, text] = log
@@ -35,6 +52,13 @@ def aggregate(cleaned_logs):
 
 
 def transform(logs):
+    """
+        Function to transform logs ac to time
+        Args:
+            logs: list of logs
+        Return:
+            Transforormed list of logs 
+    """
     result = []
     for log in logs:
         [_, timestamp, text] = log
@@ -62,6 +86,14 @@ def transform(logs):
 
 
 def reader(url, timeout):
+    """
+        Read data from url
+        Args:
+            url: http read request url
+            timeout: reuest timeout
+        Return:
+            Response data of the read request
+    """
     with urllib.request.urlopen(url, timeout=timeout) as conn:
         return conn.read()
 
