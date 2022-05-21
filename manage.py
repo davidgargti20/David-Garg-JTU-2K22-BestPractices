@@ -8,7 +8,7 @@ load_dotenv()
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cjapp.settings")
-    runserver.default_port = os.environ['DEFAULT_PORT']
+    runserver.default_port = os.environ["DEFAULT_PORT"]
     try:
         from django.core.management import execute_from_command_line
     except ImportError:

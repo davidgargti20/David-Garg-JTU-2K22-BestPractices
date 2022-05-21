@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from restapi.models import Category, Groups, UserExpense, Expenses
 from restapi.custom_exception import UnauthorizedUserException
 import logging
+
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 class UserSerializer(ModelSerializer):
     def create(self, validated_data):
         """
-            Create user object
+        Create user object
         """
         user = User.objects.create_user(**validated_data)
         logging.info("User created")
@@ -21,16 +22,14 @@ class UserSerializer(ModelSerializer):
 
     class Meta(object):
         model = User
-        fields = ('id', 'username', 'password')
-        extra_kwargs = {
-            'password': {'write_only': True}
-        }
+        fields = ("id", "username", "password")
+        extra_kwargs = {"password": {"write_only": True}}
 
 
 class CategorySerializer(ModelSerializer):
     class Meta(object):
         model = Category
-        fields = '__all__'
+        fields = "__all__"
 
 
 class GroupSerializer(ModelSerializer):
@@ -38,13 +37,13 @@ class GroupSerializer(ModelSerializer):
 
     class Meta(object):
         model = Groups
-        fields = '__all__'
+        fields = "__all__"
 
 
 class UserExpenseSerializer(ModelSerializer):
     class Meta(object):
         model = UserExpense
-        fields = ['user', 'amount_owed', 'amount_lent']
+        fields = ["user", "amount_owed", "amount_lent"]
 
 
 class ExpensesSerializer(ModelSerializer):
@@ -52,9 +51,9 @@ class ExpensesSerializer(ModelSerializer):
 
     def create(self, validated_data):
         """
-            Create Expense objects
+        Create Expense objects
         """
-        expense_users = validated_data.pop('users')
+        expense_users = validated_data.pop("users")
         expense = Expenses.objects.create(**validated_data)
         logging.info(f"Expense created")
         for eu in expense_users:
@@ -64,13 +63,13 @@ class ExpensesSerializer(ModelSerializer):
 
     def update(self, instance, validated_data):
         """
-            To Update Expense object
+        To Update Expense object
         """
-        user_expenses = validated_data.pop('users')
-        instance.description = validated_data['description']
-        instance.category = validated_data['category']
-        instance.group = validated_data.get('group', None)
-        instance.total_amount = validated_data['total_amount']
+        user_expenses = validated_data.pop("users")
+        instance.description = validated_data["description"]
+        instance.category = validated_data["category"]
+        instance.group = validated_data.get("group", None)
+        instance.total_amount = validated_data["total_amount"]
 
         if user_expenses:
             instance.users.all().delete()
@@ -86,47 +85,51 @@ class ExpensesSerializer(ModelSerializer):
 
     def validate(self, attrs):
         """
-            Validate attributes
-            Args:
-                self: self object:
-                attrs: attributes dict
-            Return:
-                Attributes if validation is successful
+        Validate attributes
+        Args:
+            self: self object:
+            attrs: attributes dict
+        Return:
+            Attributes if validation is successful
         """
-        user = self.context['request'].user
-        user_ids = [user['user'].id for user in attrs['users']]
+        user = self.context["request"].user
+        user_ids = [user["user"].id for user in attrs["users"]]
         if len(set(user_ids)) != len(user_ids):
-            raise ValidationError('Single user appears multiple times')
+            raise ValidationError("Single user appears multiple times")
 
-        if attrs.get('group', None) is not None: 
-            group = Groups.objects.get(pk=attrs['group'].id)
+        if attrs.get("group", None) is not None:
+            group = Groups.objects.get(pk=attrs["group"].id)
             group_users = group.members.all()
             if user not in group_users:
                 logging.info("Error: User not present in group")
                 raise UnauthorizedUserException()
-            for user in attrs['users']:
-                if user['user'] not in group_users:
+            for user in attrs["users"]:
+                if user["user"] not in group_users:
                     logging.info("Validation Error: User not in group")
-                    raise ValidationError('Only group members should be listed in a group transaction')
+                    raise ValidationError(
+                        "Only group members should be listed in a group transaction"
+                    )
         else:
             if user.id not in user_ids:
                 logging.info("Validation Error: User not part of expense")
-                raise ValidationError('For non-group expenses, user should be part of expense')
+                raise ValidationError(
+                    "For non-group expenses, user should be part of expense"
+                )
 
-        total_amount:float = attrs['total_amount']
-        amount_owed:float = 0
-        amount_lent:float = 0
-        for user in attrs['users']:
-            if user['amount_owed'] < 0 or user['amount_lent'] < 0 or total_amount < 0:
-                raise ValidationError('Expense amounts must be positive')
-            amount_owed += user['amount_owed']
-            amount_lent += user['amount_lent']
+        total_amount: float = attrs["total_amount"]
+        amount_owed: float = 0
+        amount_lent: float = 0
+        for user in attrs["users"]:
+            if user["amount_owed"] < 0 or user["amount_lent"] < 0 or total_amount < 0:
+                raise ValidationError("Expense amounts must be positive")
+            amount_owed += user["amount_owed"]
+            amount_lent += user["amount_lent"]
         if amount_lent != amount_owed or amount_lent != total_amount:
             logging.info("Validation Error: Inconsistent amounts")
-            raise ValidationError('Given amounts are inconsistent')
+            raise ValidationError("Given amounts are inconsistent")
 
         return attrs
 
     class Meta(object):
         model = Expenses
-        fields = '__all__'
+        fields = "__all__"

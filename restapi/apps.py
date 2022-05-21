@@ -5,4 +5,4 @@ from django.apps import AppConfig
 
 
 class RestapiConfig(AppConfig):
-    name:str= 'restapi'
+    name: str = "restapi"
