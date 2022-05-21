@@ -86,9 +86,9 @@ class ExpensesSerializer(ModelSerializer):
             if user.id not in user_ids:
                 raise ValidationError('For non-group expenses, user should be part of expense')
 
-        total_amount = attrs['total_amount']
-        amount_owed = 0
-        amount_lent = 0
+        total_amount:float = attrs['total_amount']
+        amount_owed:float = 0
+        amount_lent:float = 0
         for user in attrs['users']:
             if user['amount_owed'] < 0 or user['amount_lent'] < 0 or total_amount < 0:
                 raise ValidationError('Expense amounts must be positive')

@@ -25,15 +25,14 @@ from restapi.utils import aggregate,sort_by_time_stamp,multiThreadedReader,trans
 def index(_request):
     return HttpResponse("Hello, world. You're at Rest.")
 
-def get_user_ids(body,type):
-    user_ids = []
+def get_user_ids(body,type:str):
+    user_ids:list[int] = []
     if body.get(type, None) is not None and body[type].get('user_ids', None) is not None:
             user_ids = body[type]['user_ids']
             for user_id in user_ids:
                 if not User.objects.filter(id=user_id).exists():
                     raise BadRequestException()
     return user_ids
-
 
 @api_view(['POST'])
 def logout(request):
@@ -49,8 +48,8 @@ def balance(request):
     for expense in expenses:
         expense_balances = normalize(expense)
         for eb in expense_balances:
-            from_user = eb['from_user']
-            to_user = eb['to_user']
+            from_user:int = eb['from_user']
+            to_user:int = eb['to_user']
             if from_user == user.id:
                 final_balance[to_user] = final_balance.get(to_user, 0) - eb['amount']
             if to_user == user.id:
@@ -63,16 +62,16 @@ def balance(request):
 
 def normalize(expense):
     user_balances = expense.users.all()
-    dues = {}
+    dues:dict = {}
     for user_balance in user_balances:
         dues[user_balance.user] = dues.get(user_balance.user, 0) + user_balance.amount_lent \
                                   - user_balance.amount_owed
     dues = [(k, v) for k, v in sorted(dues.items(), key=lambda item: item[1])]
-    start = 0
-    end = len(dues) - 1
-    balances = []
+    start:int = 0
+    end:int = len(dues) - 1
+    balances:list = []
     while start < end:
-        amount = min(abs(dues[start][1]), abs(dues[end][1]))
+        amount:float = min(abs(dues[start][1]), abs(dues[end][1]))
         user_balance = {"from_user": dues[start][0].id, "to_user": dues[end][0].id, "amount": amount}
         balances.append(user_balance)
         dues[start] = (dues[start][0], dues[start][1] + amount)
@@ -122,8 +121,8 @@ class group_view_set(ModelViewSet):
             raise UnauthorizedUserException()
         group = Groups.objects.get(id=pk)
         body = request.data
-        added_ids = get_user_ids(body,'add')
-        removed_ids = get_user_ids(body,'remove')
+        added_ids:list[int] = get_user_ids(body,'add')
+        removed_ids:list[int] = get_user_ids(body,'remove')
         group.members.add(*added_ids)
         group.members.remove(*removed_ids)
         group.save()
@@ -144,18 +143,18 @@ class group_view_set(ModelViewSet):
             raise UnauthorizedUserException()
         group = Groups.objects.get(id=pk)
         expenses = Expenses.objects.filter(group=group)
-        dues = {}
+        dues:dict = {}
         for expense in expenses:
             user_balances = UserExpense.objects.filter(expense=expense)
             for user_balance in user_balances:
                 dues[user_balance.user] = dues.get(user_balance.user, 0) + user_balance.amount_lent \
                                           - user_balance.amount_owed
-        dues = [(k, v) for k, v in sorted(dues.items(), key=lambda item: item[1])]
-        start = 0
-        end = len(dues) - 1
-        balances = []
+        dues:list[float] = [(k, v) for k, v in sorted(dues.items(), key=lambda item: item[1])]
+        start:int = 0
+        end:int = len(dues) - 1
+        balances:list = []
         while start < end:
-            amount = min(abs(dues[start][1]), abs(dues[end][1]))
+            amount:float = min(abs(dues[start][1]), abs(dues[end][1]))
             amount = Decimal(amount).quantize(Decimal(10)**-2)
             user_balance = {"from_user": dues[start][0].id, "to_user": dues[end][0].id, "amount": str(amount)}
             balances.append(user_balance)
@@ -187,8 +186,8 @@ class expenses_view_set(ModelViewSet):
 @permission_classes([])
 def logProcessor(request):
     data = request.data
-    num_threads = data['parallelFileProcessingCount']
-    log_files = data['logFiles']
+    num_threads:int = data['parallelFileProcessingCount']
+    log_files:list[str] = data['logFiles']
     if num_threads <= 0 or num_threads > 30:
         return Response({"status": "failure", "reason": "Parallel Processing Count out of expected bounds"},
                         status=status.HTTP_400_BAD_REQUEST)
@@ -201,4 +200,3 @@ def logProcessor(request):
     data = aggregate(cleaned)
     response = response_format(data)
     return Response({"response":response}, status=status.HTTP_200_OK)
-

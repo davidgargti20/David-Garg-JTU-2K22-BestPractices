@@ -11,25 +11,26 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+from xmlrpc.client import boolean
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR:str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
+SECRET_KEY:str = os.environ['DJANGO_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ['DEBUG']
+DEBUG:bool = os.environ['DEBUG']
 
 # Application definition
 
-INSTALLED_APPS = [
+INSTALLED_APPS:list[str] = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,7 +42,7 @@ INSTALLED_APPS = [
     'restapi'
 ]
 
-MIDDLEWARE = [
+MIDDLEWARE:list[str] = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -53,7 +54,7 @@ MIDDLEWARE = [
 
 ]
 
-REST_FRAMEWORK = {
+REST_FRAMEWORK:dict = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10,
     'DEFAULT_PERMISSION_CLASSES': [
@@ -64,10 +65,10 @@ REST_FRAMEWORK = {
     ],
     'TEST_REQUEST_DEFAULT_FORMAT': 'json'
 }
-DEFAULT_PORT = "8080"
-ROOT_URLCONF = 'cjapp.urls'
+DEFAULT_PORT:str = "8080"
+ROOT_URLCONF:str = 'cjapp.urls'
 
-TEMPLATES = [
+TEMPLATES:list[dict] = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
@@ -84,7 +85,7 @@ TEMPLATES = [
 ]
 
 
-LOGGING = {
+LOGGING:dict = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
@@ -114,11 +115,11 @@ LOGGING = {
 
 }
 
-WSGI_APPLICATION = 'cjapp.wsgi.application'
+WSGI_APPLICATION:str = 'cjapp.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-DATABASES = {
+DATABASES:dict = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
@@ -128,7 +129,7 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
+AUTH_PASSWORD_VALIDATORS:list[dict] = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
@@ -146,21 +147,21 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE:str = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE:str = 'UTC'
 
 USE_I18N = True
 
-USE_L10N = True
+USE_L10N:bool = True
 
-USE_TZ = True
+USE_TZ:bool = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS:list['str'] = ['*']
 
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL:bool = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL:str = '/static/'
