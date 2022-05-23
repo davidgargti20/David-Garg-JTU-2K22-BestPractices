@@ -160,7 +160,7 @@ def normalize(expense):
     return balances
 
 
-class user_view_set(ModelViewSet):
+class UserViewSet(ModelViewSet):
     """
     Viewset for the users api
     """
@@ -170,7 +170,7 @@ class user_view_set(ModelViewSet):
     permission_classes = (AllowAny,)
 
 
-class category_view_set(ModelViewSet):
+class CategoryViewSet(ModelViewSet):
     """
     Viewset for the categories api
     """
@@ -180,7 +180,7 @@ class category_view_set(ModelViewSet):
     http_method_names = ["get", "post"]
 
 
-class group_view_set(ModelViewSet):
+class GroupViewSet(ModelViewSet):
     """
     Viewset for the groups api
     """
@@ -278,7 +278,7 @@ class group_view_set(ModelViewSet):
         return Response(balances, status=status.HTTP_200_OK)
 
 
-class expenses_view_set(ModelViewSet):
+class ExpensesViewSet(ModelViewSet):
     """
     Viewset for expenses api
     """
