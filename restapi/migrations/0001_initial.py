@@ -15,104 +15,42 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="Category",
+            name='Category',
             fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                ("name", models.CharField(max_length=200)),
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=200)),
             ],
         ),
         migrations.CreateModel(
-            name="Expenses",
+            name='Expenses',
             fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                ("description", models.CharField(max_length=200)),
-                ("total_amount", models.DecimalField(decimal_places=2, max_digits=10)),
-                (
-                    "category",
-                    models.ForeignKey(
-                        default=1,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to="restapi.category",
-                    ),
-                ),
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('description', models.CharField(max_length=200)),
+                ('total_amount', models.DecimalField(decimal_places=2, max_digits=10)),
+                ('category', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='restapi.category')),
             ],
         ),
         migrations.CreateModel(
-            name="UserBalance",
+            name='UserBalance',
             fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                ("amount_owed", models.DecimalField(decimal_places=2, max_digits=10)),
-                ("amount_lent", models.DecimalField(decimal_places=2, max_digits=10)),
-                (
-                    "expense",
-                    models.ForeignKey(
-                        default=1,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="users",
-                        to="restapi.expenses",
-                    ),
-                ),
-                (
-                    "user",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to=settings.AUTH_USER_MODEL,
-                    ),
-                ),
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('amount_owed', models.DecimalField(decimal_places=2, max_digits=10)),
+                ('amount_lent', models.DecimalField(decimal_places=2, max_digits=10)),
+                ('expense', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='users', to='restapi.expenses')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
-            name="Groups",
+            name='Groups',
             fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                ("name", models.CharField(max_length=100)),
-                (
-                    "members",
-                    models.ManyToManyField(
-                        blank=True, related_name="members", to=settings.AUTH_USER_MODEL
-                    ),
-                ),
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=100)),
+                ('members', models.ManyToManyField(blank=True, related_name='members', to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.AddField(
-            model_name="expenses",
-            name="group",
-            field=models.ForeignKey(
-                default=1,
-                on_delete=django.db.models.deletion.CASCADE,
-                to="restapi.groups",
-            ),
+            model_name='expenses',
+            name='group',
+            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='restapi.groups'),
         ),
     ]
